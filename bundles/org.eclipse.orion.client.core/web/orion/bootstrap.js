@@ -20,6 +20,22 @@ define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/
 		// This is code to ensure the first visit to orion works
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
+		
+		var debug = true; // TODO from preferences
+		if (debug) {
+		  function debugLog(eventName, ref, service) {
+		    var refFormatted = ref.name;
+		    if (ref.properties) {
+		      refFormatted += ' { ' + Object.keys(ref.properties).map(function(prop) {
+                return prop + ': ' + ref.properties[prop];
+		      }).join(', ') + ' }';
+		    }
+		    console.log('debug.serviceRegistry.' + eventName + ' '+ refFormatted, service);
+		  }
+		  serviceRegistry.addEventListener('serviceAdded', debugLog.bind(serviceRegistry, 'serviceAdded'));
+		  serviceRegistry.addEventListener('serviceRemoved', debugLog.bind(serviceRegistry, 'serviceAdded'));
+		}
+		
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		return preferences.getPreferences("/plugins").then(function(pluginsPreference) {
 			var pluginURLs = pluginsPreference.keys();
